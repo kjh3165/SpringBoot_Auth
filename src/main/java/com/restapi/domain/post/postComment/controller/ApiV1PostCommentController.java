@@ -1,5 +1,7 @@
 package com.restapi.domain.post.postComment.controller;
 
+import com.restapi.domain.member.member.entity.Member;
+import com.restapi.domain.member.member.service.MemberService;
 import com.restapi.domain.post.post.entity.Post;
 import com.restapi.domain.post.post.service.PostService;
 import com.restapi.domain.post.postComment.dto.PostCommentDto;
@@ -22,6 +24,7 @@ import java.util.List;
 @Tag(name="ApiV1PostCommentController", description = "API 댓글 컨트롤러")
 public class ApiV1PostCommentController {
     private final PostService postService;
+    private final MemberService memberService;
 
     @Transactional(readOnly = true)
     @GetMapping
@@ -76,13 +79,11 @@ public class ApiV1PostCommentController {
             @Valid @RequestBody PostCommentWriteReqBody reqBody
     ) {
         Post post = postService.findById(postId);
-        postService.createComment(post, reqBody.content());
+        Member author = memberService.findByUsername("user1").get();
+        PostComment postComment = postService.writeComment(author, post, reqBody.content());
 
         // 트렌잭션 끝난 후 수행되야 하는 더티체킹 및 여가지 작업들을 지금 당장 수행시킴
         postService.flush();
-
-        PostComment postComment = post.getComments().getLast();
-
 
         return new RsData<PostCommentDto>(
                 "201-1",
