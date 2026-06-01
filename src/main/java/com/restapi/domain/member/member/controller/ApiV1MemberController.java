@@ -2,8 +2,11 @@ package com.restapi.domain.member.member.controller;
 
 import com.restapi.domain.member.member.dto.MemberDto;
 import com.restapi.domain.member.member.dto.MemberJoinReqBody;
+import com.restapi.domain.member.member.dto.MemberLoginReqBody;
+import com.restapi.domain.member.member.dto.MemberLoginResBody;
 import com.restapi.domain.member.member.entity.Member;
 import com.restapi.domain.member.member.service.MemberService;
+import com.restapi.global.exception.ServiceException;
 import com.restapi.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -28,6 +31,24 @@ public class ApiV1MemberController {
                 "201-1",
                 "%s님 환영합니다. 회원가입이 완료되었습니다.".formatted(member.getNickname()),
                 new MemberDto(member)
+        );
+    }
+
+    @PostMapping("/login")
+    public RsData<MemberLoginResBody> login(@Valid @RequestBody MemberLoginReqBody reqBody) {
+        Member member = memberService.findByUsername(reqBody.username())
+                .orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 회원입니다."));
+
+        if (!member.getPassword().equals(reqBody.password())) {
+            throw new ServiceException("401-2", "비밀번호가 일치하지 않습니다.");
+        }
+
+        return new RsData<>(
+                "200-1",
+                "%s님 환영합니다.".formatted(member.getNickname()),
+                new MemberLoginResBody(
+                        new MemberDto(member),
+                        member.getApiKey())
         );
     }
 }
