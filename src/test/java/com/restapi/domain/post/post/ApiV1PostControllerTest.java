@@ -1,5 +1,7 @@
 package com.restapi.domain.post.post;
 
+import com.restapi.domain.member.member.entity.Member;
+import com.restapi.domain.member.member.service.MemberService;
 import com.restapi.domain.post.post.controller.ApiV1PostController;
 import com.restapi.domain.post.post.entity.Post;
 import com.restapi.domain.post.post.service.PostService;
@@ -31,15 +33,21 @@ public class ApiV1PostControllerTest {
 
     @Autowired
     private PostService postService;
+    @Autowired
+    private MemberService memberService;
 
     // 글쓰기 테스트
     @Test
     @DisplayName("글 쓰기")
     void t1() throws Exception {
+        Member member = memberService.findByUsername("user1").get();
+
+        String authorApiKey = member.getApiKey();
+
         // 글작성 요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
-                        post("/api/v1/posts")
+                        post("/api/v1/posts?apiKey=" + authorApiKey)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
