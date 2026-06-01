@@ -42,12 +42,13 @@ public class ApiV1PostControllerTest {
     void t1() throws Exception {
         Member member = memberService.findByUsername("user1").get();
 
-        String authorApiKey = member.getApiKey();
+        String apiKey = member.getApiKey();
 
         // 글작성 요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
-                        post("/api/v1/posts?apiKey=" + authorApiKey)
+                        post("/api/v1/posts")
+                                .header("Authorization", "Bearer " + apiKey)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -82,9 +83,9 @@ public class ApiV1PostControllerTest {
     void t2() throws Exception {
         long id = 1;
 
-        Post post = postService.findById(id);
+        Member member = memberService.findByUsername("user1").get();
 
-        String apiKey = post.getAuthor().getApiKey();
+        String apiKey = member.getApiKey();
 
         //요청을 보냅니다.
         ResultActions resultActions = mvc
@@ -119,10 +120,15 @@ public class ApiV1PostControllerTest {
     void t3() throws Exception {
         long id = 1;
 
+        Member member = memberService.findByUsername("user1").get();
+
+        String apiKey = member.getApiKey();
+
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         delete("/api/v1/posts/" + id)
+                                .header("Authorization", "Bearer " + apiKey)
                 )
                 .andDo(print()); // 응답을 출력합니다.
 
