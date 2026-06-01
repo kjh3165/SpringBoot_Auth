@@ -11,13 +11,17 @@ import com.restapi.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController // @Controller + @ResponseBody
+@Validated
 @RequestMapping("/api/v1/posts")
 @RequiredArgsConstructor
 @Tag(name="ApiV1PostController", description = "API 글 컨트롤러")
@@ -57,8 +61,17 @@ public class ApiV1PostController {
     @Transactional
     @PostMapping
     @Operation(summary = "작성")
-    public RsData<PostDto> write(@Valid @RequestBody PostWriteReqBody reqBody) {
-        Member author = memberService.findByUsername("user1").get();
+    public RsData<PostDto> write(
+            @Valid @RequestBody PostWriteReqBody reqBody,
+            @NotBlank @Size(min = 2, max = 30) String username,
+            @NotBlank @Size(min = 2, max = 30) String password
+    ) {
+        Member author = memberService.findByUsername(username).get();
+
+        if (!author.getPassword().equals(password)) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다");
+        }
+
         Post post = postService.create(author, reqBody.title(), reqBody.content());
 
         return new RsData<>(
