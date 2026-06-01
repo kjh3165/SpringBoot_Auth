@@ -223,11 +223,16 @@ public class ApiV1PostControllerTest {
     @Test
     @DisplayName("글 쓰기 400 - 제목 누락")
     void t7() throws Exception {
+        Member member = memberService.findByUsername("user1").get();
+
+        String apiKey = member.getApiKey();
+
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         post("/api/v1/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + apiKey)
                                 .content("""
                                         {
                                             "title": "",
@@ -253,11 +258,16 @@ public class ApiV1PostControllerTest {
     @Test
     @DisplayName("글 쓰기 400 - 내용 누락")
     void t8() throws Exception {
+        Member member = memberService.findByUsername("user1").get();
+
+        String apiKey = member.getApiKey();
+
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         post("/api/v1/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + apiKey)
                                 .content("""
                                         {
                                             "title": "제목",
@@ -283,11 +293,16 @@ public class ApiV1PostControllerTest {
     @Test
     @DisplayName("글 쓰기 400 - JSON 문법 에러")
     void t9() throws Exception {
+        Member member = memberService.findByUsername("user1").get();
+
+        String apiKey = member.getApiKey();
+
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         post("/api/v1/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + apiKey)
                                 .content("""
                                         {
                                             "title": "제목",
