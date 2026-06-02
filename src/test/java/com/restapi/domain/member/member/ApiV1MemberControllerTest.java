@@ -103,6 +103,8 @@ public class ApiV1MemberControllerTest {
                 result -> {
                     Cookie apiKeyCookie= result.getResponse().getCookie("apiKey");
                     assertThat(apiKeyCookie.getValue()).isNotBlank();
+                    assertThat(apiKeyCookie.getPath()).isEqualTo("/");
+                    assertThat(apiKeyCookie.isHttpOnly()).isTrue();
                 }
         );
     }
