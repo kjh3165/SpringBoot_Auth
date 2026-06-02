@@ -7,14 +7,12 @@ import com.restapi.domain.member.member.dto.MemberLoginResBody;
 import com.restapi.domain.member.member.entity.Member;
 import com.restapi.domain.member.member.service.MemberService;
 import com.restapi.global.exception.ServiceException;
+import com.restapi.global.rq.Rq;
 import com.restapi.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/members")
@@ -22,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name="ApiV1MemberController", description = "API 맴버 컨트롤러")
 public class ApiV1MemberController {
     private final MemberService memberService;
+    private final Rq rq;
 
     @PostMapping
     public RsData<MemberDto> join(@Valid @RequestBody MemberJoinReqBody reqBody) {
@@ -49,6 +48,17 @@ public class ApiV1MemberController {
                 new MemberLoginResBody(
                         new MemberDto(member),
                         member.getApiKey())
+        );
+    }
+
+    @GetMapping("/me")
+    public RsData<MemberDto> me() {
+        Member actor = rq.getActor();
+
+        return new RsData(
+                "200-1",
+                "%s님 정보입니다.".formatted(actor.getNickname()),
+                new MemberDto(actor)
         );
     }
 }
