@@ -1,7 +1,6 @@
 package com.restapi.domain.post.post.controller;
 
 import com.restapi.domain.member.member.entity.Member;
-import com.restapi.domain.member.member.service.MemberService;
 import com.restapi.domain.post.post.dto.PostDto;
 import com.restapi.domain.post.post.dto.PostModifyReqBody;
 import com.restapi.domain.post.post.dto.PostWriteReqBody;
@@ -27,7 +26,6 @@ import java.util.List;
 @Tag(name="ApiV1PostController", description = "API 글 컨트롤러")
 public class ApiV1PostController {
     private final PostService postService;
-    private final MemberService memberService;
     private final Rq rq;
 
     @Transactional(readOnly = true)
