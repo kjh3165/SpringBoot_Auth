@@ -100,10 +100,14 @@ public class ApiV1PostCommentControllerTest {
         long postId = 1;
         long id = 1;
 
+        Post beforePost = postService.findById(postId);
+        String apiKey = beforePost.getAuthor().getApiKey(); // 유저1의 apiKey 정보
+
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         delete("/api/v1/posts/%d/comments/%d".formatted(postId, id))
+                                .header("Authorization", "Bearer " + apiKey)
                 )
                 .andDo(print()); // 응답을 출력합니다.
 
@@ -117,16 +121,20 @@ public class ApiV1PostCommentControllerTest {
     }
 
     @Test
-    @DisplayName("댓글 삭제")
+    @DisplayName("댓글 수정")
     void t4() throws Exception {
         long postId = 1;
         long id = 1;
+
+        Post beforePost = postService.findById(postId);
+        String apiKey = beforePost.getAuthor().getApiKey(); // 유저1의 apiKey 정보
 
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         put("/api/v1/posts/%d/comments/%d".formatted(postId, id))
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + apiKey)
                                 .content("""
                                         {
                                             "content": "내용 update"

@@ -63,11 +63,21 @@ public class ApiV1PostCommentController {
     @Operation(summary = "삭제")
     public RsData<Void> delete(
             @PathVariable long postId,
-            @PathVariable long id
+            @PathVariable long id,
+            @NotBlank @Size(min = 2, max = 50) @RequestHeader("Authorization") String authorization
     ) {
+        String apiKey = authorization.replace("Bearer ", "");
+
+        Member author = memberService.findByApiKey(apiKey)
+                .orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 회원입니다."));
+
         Post post = postService.findById(postId);
 
         PostComment postComment = post.findCommentById(id).get();
+
+        if (!author.equals(postComment.getAuthor())) {
+            throw new ServiceException("403-1", "댓글 삭제 권한이 없습니다.");
+        }
 
         postService.deleteComment(post, postComment);
 
@@ -107,11 +117,21 @@ public class ApiV1PostCommentController {
     public RsData<Void> modify(
             @PathVariable long postId,
             @PathVariable long id,
-            @Valid @RequestBody PostCommentModifyReqBody reqBody
+            @Valid @RequestBody PostCommentModifyReqBody reqBody,
+            @NotBlank @Size(min = 2, max = 50) @RequestHeader("Authorization") String authorization
     ) {
+        String apiKey = authorization.replace("Bearer ", "");
+
+        Member author = memberService.findByApiKey(apiKey)
+                .orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 회원입니다."));
+
         Post post = postService.findById(postId);
 
         PostComment postComment = post.findCommentById(id).get();
+
+        if (!author.equals(postComment.getAuthor())) {
+            throw new ServiceException("403-1", "댓글 수정 권한이 없습니다.");
+        }
 
         postService.modifyComment(postComment, reqBody.content());
 
