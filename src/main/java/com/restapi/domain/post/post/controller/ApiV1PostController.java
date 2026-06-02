@@ -6,7 +6,6 @@ import com.restapi.domain.post.post.dto.PostModifyReqBody;
 import com.restapi.domain.post.post.dto.PostWriteReqBody;
 import com.restapi.domain.post.post.entity.Post;
 import com.restapi.domain.post.post.service.PostService;
-import com.restapi.global.exception.ServiceException;
 import com.restapi.global.rq.Rq;
 import com.restapi.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,9 +57,7 @@ public class ApiV1PostController {
 
         Post post = postService.findById(id);
 
-        if (!actor.equals(post.getAuthor())) {
-            throw new ServiceException("403-1", "글 삭제 권한이 없습니다.");
-        }
+        post.checkActorCanDelete(actor);
 
         postService.delete(post);
         return new RsData<>("200-1", "%d번 게시글이 삭제되었습니다.".formatted(id), new PostDto(post));
@@ -94,9 +91,7 @@ public class ApiV1PostController {
 
         Post post = postService.findById(id);
 
-        if (!actor.equals(post.getAuthor())) {
-            throw new ServiceException("403-1", "글 수정 권한이 없습니다.");
-        }
+        post.checkActorCanModify(actor);
 
         postService.update(post, reqBody.title(), reqBody.content());
 
