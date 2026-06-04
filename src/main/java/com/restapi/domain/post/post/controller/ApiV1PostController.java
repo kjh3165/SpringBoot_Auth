@@ -9,6 +9,7 @@ import com.restapi.domain.post.post.service.PostService;
 import com.restapi.global.rq.Rq;
 import com.restapi.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.util.List;
 @RequestMapping("/api/v1/posts")
 @RequiredArgsConstructor
 @Tag(name="ApiV1PostController", description = "API 글 컨트롤러")
+@SecurityRequirement(name = "bearerAuth")
 public class ApiV1PostController {
     private final PostService postService;
     private final Rq rq;

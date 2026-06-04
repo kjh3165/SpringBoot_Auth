@@ -8,10 +8,10 @@ import com.restapi.domain.post.postComment.dto.PostCommentDto;
 import com.restapi.domain.post.postComment.dto.PostCommentModifyReqBody;
 import com.restapi.domain.post.postComment.dto.PostCommentWriteReqBody;
 import com.restapi.domain.post.postComment.entity.PostComment;
-import com.restapi.global.exception.ServiceException;
 import com.restapi.global.rq.Rq;
 import com.restapi.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @Tag(name="ApiV1PostCommentController", description = "API 댓글 컨트롤러")
+@SecurityRequirement(name = "bearerAuth")
 public class ApiV1PostCommentController {
     private final PostService postService;
     private final MemberService memberService;
