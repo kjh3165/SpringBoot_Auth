@@ -1,6 +1,5 @@
-package com.restapi.domain.member.member;
+package com.restapi.domain.member.member.controller;
 
-import com.restapi.domain.member.member.controller.ApiV1MemberController;
 import com.restapi.domain.member.member.entity.Member;
 import com.restapi.domain.member.member.service.MemberService;
 import jakarta.servlet.http.Cookie;
