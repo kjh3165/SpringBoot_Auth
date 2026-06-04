@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -21,24 +22,19 @@ public class Rq {
     private final MemberService memberService;
 
     public Member getActor() {
-        String headerAuthorization =  req.getHeader("Authorization");
+        String headerAuthorization = getHeader("Authorization", "");
 
         String apiKey;
 
         // headerAuthorization이 존재한다면
-        if (headerAuthorization != null && !headerAuthorization.isBlank()) {
+        if (!headerAuthorization.isBlank()) {
             if (!headerAuthorization.startsWith("Bearer ")) {
                 throw new ServiceException("401-2", "인증 정보가 올바르지 않습니다.");
             }
 
             apiKey = headerAuthorization.substring("Bearer ".length()).trim();
         } else { // headerAuthorization 존재하지 않는다면 쿠키에서 apiKey를 가지고 오기
-            apiKey = req.getCookies() == null ?
-                    "" :
-                    Arrays.stream(req.getCookies())
-                    .filter(cookie -> "apiKey".equals(cookie.getName()))
-                    .map(Cookie::getValue)
-                    .findFirst().orElse("");
+            apiKey = getCookieValue("apiKey", "");
         }
 
         if (apiKey.isBlank()) {
@@ -50,6 +46,26 @@ public class Rq {
                 .orElseThrow(() -> new ServiceException("401-3", "회원을 찾을 수 없습니다."));
 
         return member;
+    }
+
+    private String getHeader(String name, String defaultValue) {
+        return Optional
+                .ofNullable(req.getHeader(name))
+                .filter(headerValue -> !headerValue.isBlank())
+                .orElse(defaultValue);
+    }
+
+    private String getCookieValue(String name, String defaultValue) {
+        return Optional
+                .ofNullable(req.getCookies())
+                .flatMap(
+                        cookies ->
+                                Arrays.stream(req.getCookies())
+                                        .filter(cookie -> name.equals(cookie.getName()))
+                                        .map(Cookie::getValue)
+                                        .findFirst()
+                )
+                .orElse(defaultValue);
     }
 
     public void setCookie(String name, String value) {
