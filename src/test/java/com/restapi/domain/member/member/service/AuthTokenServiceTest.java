@@ -1,5 +1,6 @@
 package com.restapi.domain.member.member.service;
 
+import com.restapi.domain.member.member.entity.Member;
 import com.restapi.standard.util.Ut;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -24,6 +25,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class AuthTokenServiceTest {
     @Autowired
     private AuthTokenService authTokenService;
+
+    @Autowired
+    private MemberService memberService;
 
     @Test
     @DisplayName("authTokenService가 존재한다.")
@@ -71,6 +75,17 @@ public class AuthTokenServiceTest {
                 expireSeconds,
                 claims
         );
+
+        assertThat(jwt).isNotBlank();
+
+        System.out.println("jwt : " + jwt);
+    }
+
+    @Test
+    @DisplayName("authTokenService.genAccessToken(member);")
+    void t4 () {
+        Member member = memberService.findByUsername("user1").get();
+        String jwt = authTokenService.genAccessToken(member);
 
         assertThat(jwt).isNotBlank();
 
