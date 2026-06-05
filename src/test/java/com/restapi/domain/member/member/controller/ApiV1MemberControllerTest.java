@@ -194,4 +194,38 @@ public class ApiV1MemberControllerTest {
                         }
                 );
     }
+
+    @Test
+    @DisplayName("엑세스 토큰이 만료되었거나 유효하지 않다면 apiKey를 통해서 재발급")
+    void t6() throws Exception {
+        Member actor = memberService.findByUsername("user1").get();
+        String actorApiKey = actor.getApiKey();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/members/me")
+                                .header("Authorization", "Bearer " + actorApiKey + " wrong-access-token")
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1MemberController.class))
+                .andExpect(handler().methodName("me"))
+                .andExpect(status().isOk());
+
+        resultActions.andExpect(
+                result -> {
+                    Cookie accessTokenCookie = result.getResponse().getCookie("accessToken");
+                    assertThat(accessTokenCookie.getValue()).isNotBlank();
+                    assertThat(accessTokenCookie.getPath()).isEqualTo("/");
+                    assertThat(accessTokenCookie.isHttpOnly()).isTrue();
+
+                    String headerAuthorization = result.getResponse().getHeader("Authorization");
+                    assertThat(headerAuthorization).isNotBlank();
+
+                    String[] headerAuthorizations =  headerAuthorization.split(" ", 3);
+                    assertThat(headerAuthorizations[2]).isEqualTo(accessTokenCookie.getValue());
+                }
+        );
+    }
 }
