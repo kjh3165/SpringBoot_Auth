@@ -5,6 +5,7 @@ import com.restapi.domain.member.member.dto.MemberJoinReqBody;
 import com.restapi.domain.member.member.dto.MemberLoginReqBody;
 import com.restapi.domain.member.member.dto.MemberLoginResBody;
 import com.restapi.domain.member.member.entity.Member;
+import com.restapi.domain.member.member.service.AuthTokenService;
 import com.restapi.domain.member.member.service.MemberService;
 import com.restapi.global.exception.ServiceException;
 import com.restapi.global.rq.Rq;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @SecurityRequirement(name = "bearerAuth")
 public class ApiV1MemberController {
     private final MemberService memberService;
+    private final AuthTokenService authTokenService;
     private final Rq rq;
 
     @PostMapping
@@ -46,14 +48,19 @@ public class ApiV1MemberController {
             throw new ServiceException("401-2", "비밀번호가 일치하지 않습니다.");
         }
 
+        String accessToken = authTokenService.genAccessToken(member);
+
         rq.setCookie("apiKey", member.getApiKey());
+        rq.setCookie("accessToken", accessToken);
 
         return new RsData<>(
                 "200-1",
                 "%s님 환영합니다.".formatted(member.getNickname()),
                 new MemberLoginResBody(
                         new MemberDto(member),
-                        member.getApiKey())
+                        member.getApiKey(),
+                        accessToken
+                )
         );
     }
 
