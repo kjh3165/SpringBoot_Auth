@@ -1,8 +1,7 @@
-package com.restapi.domain.post.post;
+package com.restapi.domain.post.post.controller;
 
 import com.restapi.domain.member.member.entity.Member;
 import com.restapi.domain.member.member.service.MemberService;
-import com.restapi.domain.post.post.controller.ApiV1PostController;
 import com.restapi.domain.post.post.entity.Post;
 import com.restapi.domain.post.post.service.PostService;
 import org.hamcrest.Matchers;
