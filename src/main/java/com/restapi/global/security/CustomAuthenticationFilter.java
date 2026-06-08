@@ -19,7 +19,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-        System.out.println("CustomAuthenticationFilter: " + request.getRequestURI());
+        logger.debug("CustomAuthenticationFilter: " + request.getRequestURI());
 
         filterChain.doFilter(request,response);
     }
