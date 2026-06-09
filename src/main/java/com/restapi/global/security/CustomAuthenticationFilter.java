@@ -4,6 +4,7 @@ import com.restapi.domain.member.member.entity.Member;
 import com.restapi.domain.member.member.service.MemberService;
 import com.restapi.global.exception.ServiceException;
 import com.restapi.global.rq.Rq;
+import com.restapi.global.rsData.RsData;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,6 +31,24 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         logger.debug("CustomAuthenticationFilter: " + request.getRequestURI());
 
+        try {
+            work(request, response, filterChain);
+        } catch (ServiceException e) {
+            RsData<Void> rsData = e.getRsData();
+            response.setContentType("application/json");
+            response.setStatus(rsData.statusCode());
+            response.getWriter().write("""
+                        {
+                            "resultCode": "%s",
+                            "msg": "%s"
+                        }
+                    """.formatted(rsData.resultCode(), rsData.msg()));
+        } catch(Exception e) {
+            throw e;
+        }
+    }
+
+    private void work(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         // API 요청 아니라면 패스
         if (!request.getRequestURI().startsWith("/api/")) {
             filterChain.doFilter(request, response);
