@@ -32,7 +32,26 @@ public class SecurityConfig {
                 ).csrf(
                         AbstractHttpConfigurer::disable
                 )
-                .addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(
+                        exceptionHandling -> exceptionHandling
+                                .accessDeniedHandler(
+                                        (request, response, accessDeniedException) -> {
+                                            response.setContentType("application/json;charset=UTF-8");
+
+                                            response.setStatus(403);
+                                            response.getWriter().write(
+                                                    """
+                                                            {
+                                                                 "resultCode": "403-1",
+                                                                 "msg": "권한이 없습니다."
+                                                            }
+                                                            """
+                                            );
+                                        }
+                                )
+                )
+        ;
 
         return http.build();
     }
