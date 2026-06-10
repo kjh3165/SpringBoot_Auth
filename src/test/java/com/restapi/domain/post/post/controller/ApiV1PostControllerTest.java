@@ -5,19 +5,24 @@ import com.restapi.domain.member.member.service.MemberService;
 import com.restapi.domain.post.post.entity.Post;
 import com.restapi.domain.post.post.service.PostService;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -35,19 +40,25 @@ public class ApiV1PostControllerTest {
     @Autowired
     private MemberService memberService;
 
+    @Autowired
+    private WebApplicationContext context;
+
+    @BeforeEach
+    void setUp() {
+        mvc = MockMvcBuilders.webAppContextSetup(context)
+                .apply(springSecurity())
+                .build();
+    }
+
     // 글쓰기 테스트
     @Test
     @DisplayName("글 쓰기")
+    @WithUserDetails("user1")
     void t1() throws Exception {
-        Member member = memberService.findByUsername("user1").get();
-
-        String apiKey = member.getApiKey();
-
         // 글작성 요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         post("/api/v1/posts")
-                                .header("Authorization", "Bearer " + apiKey)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -221,17 +232,13 @@ public class ApiV1PostControllerTest {
     //글쓰기 제목 누락 테스트
     @Test
     @DisplayName("글 쓰기 400 - 제목 누락")
+    @WithUserDetails("user1")
     void t7() throws Exception {
-        Member member = memberService.findByUsername("user1").get();
-
-        String apiKey = member.getApiKey();
-
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         post("/api/v1/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .header("Authorization", "Bearer " + apiKey)
                                 .content("""
                                         {
                                             "title": "",
@@ -256,17 +263,13 @@ public class ApiV1PostControllerTest {
     //글쓰기 내용 누락 테스트
     @Test
     @DisplayName("글 쓰기 400 - 내용 누락")
+    @WithUserDetails("user1")
     void t8() throws Exception {
-        Member member = memberService.findByUsername("user1").get();
-
-        String apiKey = member.getApiKey();
-
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         post("/api/v1/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .header("Authorization", "Bearer " + apiKey)
                                 .content("""
                                         {
                                             "title": "제목",
@@ -291,17 +294,13 @@ public class ApiV1PostControllerTest {
     //글쓰기 JSON 문법 에러 테스트
     @Test
     @DisplayName("글 쓰기 400 - JSON 문법 에러")
+    @WithUserDetails("user1")
     void t9() throws Exception {
-        Member member = memberService.findByUsername("user1").get();
-
-        String apiKey = member.getApiKey();
-
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         post("/api/v1/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .header("Authorization", "Bearer " + apiKey)
                                 .content("""
                                         {
                                             "title": "제목",
@@ -395,17 +394,13 @@ public class ApiV1PostControllerTest {
 
     @Test
     @DisplayName("글 수정, without permission")
+    @WithUserDetails("user2")
     void t13() throws Exception {
         long id = 1;
-
-        Member author = memberService.findByUsername("user2").get();
-        String apiKey = author.getApiKey();
-
         ResultActions resultActions = mvc
                 .perform(
                         put("/api/v1/posts/" + id)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .header("Authorization", "Bearer " + apiKey)
                                 .content("""
                                         {
                                             "title": "제목 update",
@@ -425,18 +420,14 @@ public class ApiV1PostControllerTest {
 
     @Test
     @DisplayName("글 삭제, without permission")
+    @WithUserDetails("user2")
     void t14() throws Exception {
         long id = 1;
-
-        Member author = memberService.findByUsername("user2").get();
-
-        String apiKey = author.getApiKey();
 
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         delete("/api/v1/posts/" + id)
-                                .header("Authorization", "Bearer " + apiKey)
                 )
 
                 .andDo(print()); // 응답을 출력합니다.
